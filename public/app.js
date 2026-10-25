@@ -1,4 +1,4 @@
-/* Mirá — onde plantar árvores em Manaus. Lê data/web.json (gerado pela etapa 7 do pipeline). */
+/* Mirá — onde plantar árvores em Manaus. Lê data/web.json (gerado pela etapa 8 do pipeline). */
 (function () {
   "use strict";
   const $ = (id) => document.getElementById(id);
@@ -54,11 +54,21 @@
       if (D.cob[i] == null) return css("--semdado");
       return rampa(RAMPA_VERDE, D.cob[i], 0, 100);
     }
+    if (camada === "copa") {
+      if (D.copa == null || D.copa[i] == null) return css("--semdado");
+      if (D.excl[i] === 1) return COR_EXCL()[1];
+      return rampa(RAMPA_COPA, D.copa[i], 0, 80);
+    }
+    if (camada === "perda") {
+      if (D.excl[i] === 1) return COR_EXCL()[1];
+      return D.perda && D.perda[i] ? css("--perda") : css("--neutro");
+    }
     const d = D.dens[i];
     return d < 10 ? css("--semdado") : rampa(RAMPA_PESSOAS, Math.log10(d), 1, 4.5);
   }
   const RAMPA_CALOR = [[44, 98, 160], [130, 180, 210], [240, 236, 220], [235, 150, 90], [170, 35, 35]];
   const RAMPA_VERDE = [[245, 240, 220], [190, 220, 160], [110, 175, 100], [45, 120, 60], [20, 70, 35]];
+  const RAMPA_COPA = [[245, 240, 220], [200, 225, 170], [120, 180, 105], [40, 120, 65], [10, 65, 40]];
   const RAMPA_PESSOAS = [[238, 236, 245], [200, 190, 225], [150, 125, 195], [100, 70, 160], [60, 20, 110]];
   function rampa(st, v, lo, hi) {
     const t = Math.max(0, Math.min(1, (v - lo) / (hi - lo))) * (st.length - 1);
@@ -145,6 +155,12 @@
   // ---------- legenda ----------
   function legenda() {
     const L_ = $("legenda");
+    if (camada === "perda") {
+      L_.innerHTML = `<span><i style="background:${css("--perda")}"></i>Provável perda de copa (${fmt(D.meta.hex_perda_copa || 0)} hexágonos)</span>` +
+        `<span><i style="background:${css("--neutro")}"></i>Sem indício de perda</span><span><i style="background:${COR_EXCL()[1]}"></i>Água</span>` +
+        `<span>Havia copa nas imagens de ${D.meta.copas_periodo || "2010–2019"} (CHMv2) e hoje há pouco verde (Sentinel-2): provável desmatamento ou obra.</span>`;
+      return;
+    }
     if (camada === "prioridade") {
       const f = COR_FAIXA(), e = COR_EXCL();
       L_.innerHTML = NOME_FAIXA.map((n, k) => `<span><i style="background:${f[k]}"></i>${n}</span>`).join("") +
@@ -153,11 +169,14 @@
     } else {
       const cfg = { calor: [RAMPA_CALOR, "−6 °C", "+6 °C", "Superfície em relação à mediana da cidade (Landsat, estação seca)"],
         verde: [RAMPA_VERDE, "0%", "100%", "Cobertura vegetal (Sentinel-2)"],
+        copa: [RAMPA_COPA, "0%", "80%+", `Copa de árvores, altura ≥ 3 m (CHMv2, imagens de ${D.meta.copas_periodo || "2010–2019"})`],
         pessoas: [RAMPA_PESSOAS, "10", "30 mil+", "Moradores por km² (Censo 2022)"] }[camada];
       const g = `linear-gradient(90deg,${cfg[0].map((c) => `rgb(${c})`).join(",")})`;
       L_.innerHTML = `<span class="rampa">${cfg[1]}<span class="barra" style="background:${g}"></span>${cfg[2]}</span><span>${cfg[3]}</span>`;
     }
   }
+
+  const temCopa = (i) => D.copa != null && D.copa[i] != null;
 
   // ---------- ficha do hexágono ----------
   function ficha(i) {
@@ -170,7 +189,7 @@
       const t = {
         "água": "Este hexágono é principalmente água.",
         "área aeroportuária": "Fica em área aeroportuária, onde árvores não são indicadas.",
-        "vegetação densa (proteger)": `Já tem vegetação densa${cob != null ? ` (${cob}% de cobertura)` : ""}. Aqui a prioridade é proteger a vegetação que existe, não plantar.`,
+        "vegetação densa (proteger)": `Já tem vegetação densa${cob != null ? ` (${cob}% de cobertura vegetal${temCopa(i) ? ` e ${D.copa[i]}% de copa de árvores` : ""})` : ""}. Aqui a prioridade é proteger a vegetação que existe, não plantar.`,
         "sem dado de satélite": "Não há cenas de satélite sem nuvem suficientes para este hexágono.",
       }[motivo] || motivo;
       topo = `<span class="pill" style="color:var(--muted)">Fora do índice: ${motivo}</span>`;
@@ -193,7 +212,9 @@
         <div><dt>Praças e áreas públicas</dt><dd>${fmt(D.praca[i])} m²</dd></div>
         <div><dt>Ruas (avenidas)</dt><dd>${fmt(D.vias[i])} m (${fmt(D.viasp[i])} m)</dd></div>
         <div><dt>Escolas e creches</dt><dd>${D.escolas[i]}</dd></div>
+        ${temCopa(i) ? `<div><dt>Copa de árvores</dt><dd>${D.copa[i]}%${D.altc[i] != null ? ` · ${D.altc[i]} m de altura média` : ""}</dd></div>` : ""}
       </dl>
+      ${D.perda && D.perda[i] ? `<p class="alerta">Provável perda de copa: havia ${D.copa[i]}% de copa de árvores nas imagens de ${D.meta.copas_periodo || "2010–2019"} e hoje a cobertura vegetal é de ${cob}%. Pode ser desmatamento ou obra recente; vale conferir no local.</p>` : ""}
       <div class="controles"><a class="btn" href="${gmaps}" target="_blank" rel="noopener">Ver o local no Google Maps</a>
       <button class="btn" type="button" id="abrirRel">Relatório de ${b}</button></div>
       <p class="sub" style="font-family:var(--f-data);font-size:11px">Hexágono ${D.h3[i]} · ${lat.toFixed(5)}, ${lng.toFixed(5)}</p>`;
@@ -202,7 +223,7 @@
 
   // ---------- agregados por bairro ----------
   function agregar() {
-    const A = B.map((nome, k) => ({ k, nome, hex: 0, pop: 0, hexMt: 0, popMt: 0, rob: 0, cobS: 0, cobN: 0, anomS: 0, anomN: 0, op: [0, 0, 0, 0, 0] }));
+    const A = B.map((nome, k) => ({ k, nome, hex: 0, pop: 0, hexMt: 0, popMt: 0, rob: 0, cobS: 0, cobN: 0, anomS: 0, anomN: 0, perda: 0, op: [0, 0, 0, 0, 0] }));
     for (let i = 0; i < N; i++) {
       const a = A[D.bairro[i]];
       a.hex++; a.pop += D.pop[i];
@@ -212,6 +233,7 @@
       }
       if (faixa[i] === 3) { a.hexMt++; a.popMt += D.pop[i]; a.op[D.op[i]]++; }
       if (D.robusto[i]) a.rob++;
+      if (D.perda && D.perda[i]) a.perda++;
     }
     A.forEach((a) => { a.pctMt = (100 * a.hexMt) / a.hex; a.cob = a.cobN ? a.cobS / a.cobN : null; a.anom = a.anomN ? a.anomS / a.anomN : null; });
     return A;
@@ -269,7 +291,8 @@
         ? `Em ${nome}, ${fmt(a.hexMt)} hexágonos de cerca de 120 m estão entre os 10% mais prioritários de Manaus para o plantio de árvores, e neles moram cerca de ${fmt(a.popMt)} pessoas.`
         : `${nome} não tem hexágonos entre os 10% mais prioritários da cidade com os pesos atuais.`}
         A cobertura vegetal média do bairro é de ${a.cob == null ? "—" : fmt(a.cob, 0) + "%"} (cidade: ${fmt(cobCidade, 0)}%), e a superfície fica, em média, ${a.anom == null ? "—" : sinal(a.anom) + " °C"} em relação à mediana da cidade na estação seca.
-        ${opTxt ? `Entre os hexágonos de prioridade muito alta: ${opTxt}.` : ""}</p>
+        ${opTxt ? `Entre os hexágonos de prioridade muito alta: ${opTxt}.` : ""}
+        ${a.perda ? `Há ${fmt(a.perda)} hexágono${a.perda > 1 ? "s" : ""} com provável perda de copa: tinham árvores nas imagens de ${D.meta.copas_periodo || "2010–2019"} e hoje têm pouco verde.` : ""}</p>
       <h3>Os ${Math.min(10, top.length)} pontos mais prioritários do bairro</h3>
       <div class="tabela"><table><thead><tr><th class="n">#</th><th class="n">Índice</th><th>Faixa</th><th>Robusto</th><th class="n">Superfície</th><th class="n">Cobertura</th><th class="n">Moradores</th><th>Oportunidade</th><th>Local</th></tr></thead><tbody>
       ${top.slice(0, 10).map((i, r) => `<tr><td class="n">${r + 1}</td><td class="n">${fmt(indice[i], 0)}</td><td>${NOME_FAIXA[faixa[i]]}</td><td>${D.robusto[i] ? "sim" : "—"}</td>
@@ -342,7 +365,8 @@
       `<strong>Moradores:</strong> Censo 2022 por setor censitário, distribuído entre os hexágonos pela área e pela habitabilidade (menos peso para água e mata). Idosos (60+) e crianças (0 a 4 anos) contam 50% a mais.`,
       `<strong>Índice:</strong> cada fator vira um percentil entre os hexágonos elegíveis; o índice é a média ponderada (padrão 40% calor, 30% falta de verde, 30% moradores). Faixas: muito alta = 10% mais prioritários; alta = 75 a 90; média = 50 a 75.`,
       `<strong>Robustez:</strong> “robusto” = entre os 10% mais prioritários com cinco conjuntos de pesos diferentes (padrão, iguais e ênfase em cada fator).`,
-      `<strong>Fora do índice:</strong> água (mais de 50% do hexágono), área aeroportuária, vegetação já densa (cobertura de 60% ou mais: proteger, não plantar) e falta de dado de satélite.`,
+      `<strong>Copas de árvores:</strong> mapa de altura das copas CHMv2 (Meta e WRI, ~1,2 m por pixel), gerado por um modelo de visão computacional (DINOv3) sobre imagens de satélite de alta resolução de ${m.copas_periodo || "2010–2019"}. Copa = pixel com altura de 3 m ou mais, o que separa árvore de gramado. Por ser mais antigo que os outros dados, não entra no índice: refina a exclusão de vegetação densa e indica provável perda de copa (pelo menos 30 pontos a mais de copa no CHMv2 do que de cobertura vegetal hoje).`,
+      `<strong>Fora do índice:</strong> água (mais de 50% do hexágono), área aeroportuária, vegetação já densa (cobertura de 60% ou mais e copa de árvores de 30% ou mais: proteger, não plantar; gramados e pastos continuam no índice) e falta de dado de satélite.`,
       `<strong>Oportunidade:</strong> do OpenStreetMap, que é incompleto e não informa a largura das calçadas. Não entra no índice.`,
       `<strong>Limites:</strong> a distribuição da população dentro de cada setor é estimada; a malha de bairros é a do Censo 2022 (ainda sem a Colônia Japonesa, criada em 2025).`,
     ].map((t) => `<li>${t}</li>`).join("");
@@ -404,6 +428,7 @@
       if (i == null) return;
       sel = i; ficha(i); layer.redraw();
     });
+    if (!D.copa) document.querySelectorAll('[data-camada="copa"],[data-camada="perda"]').forEach((b) => b.remove());
     controles();
     ["wCalor", "wVerde", "wPessoas"].forEach((w, j) => { $(w).value = Math.round(100 * [pesos.calor, pesos.verde, pesos.pessoas][j]); });
     atualizar();
@@ -412,5 +437,5 @@
     let topo = 0; for (let i = 0; i < N; i++) if (rankCidade[i] === 1) topo = i;
     sel = topo; ficha(topo); layer.redraw();
   }
-  init().catch((e) => { console.error(e.stack); $("mapa").innerHTML = `<div class="carregando">Não foi possível carregar os dados (${e.message}). Rode a etapa 7 do pipeline e abra o site por um servidor (python -m http.server).</div>`; });
+  init().catch((e) => { console.error(e.stack); $("mapa").innerHTML = `<div class="carregando">Não foi possível carregar os dados (${e.message}). Rode a etapa 8 do pipeline e abra o site por um servidor (python -m http.server).</div>`; });
 })();

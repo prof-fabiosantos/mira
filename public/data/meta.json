@@ -29,11 +29,11 @@
   ]
  },
  "hexagonos": 32216,
- "elegiveis": 16262,
+ "elegiveis": 16913,
  "exclusoes": {
-  "vegetação densa (proteger)": 14183,
+  "vegetação densa (proteger)": 13509,
   "água": 1065,
-  "sem dado de satélite": 435,
+  "sem dado de satélite": 458,
   "área aeroportuária": 271
  },
  "fontes": {
@@ -41,6 +41,7 @@
   "vegetacao": "ESA Copernicus Sentinel-2 L2A, Microsoft Planetary Computer",
   "populacao": "IBGE, Censo Demográfico 2022, agregados por setor censitário",
   "espaco": "© colaboradores do OpenStreetMap",
+  "copas": "Meta e WRI, CHMv2 (Tolan et al. 2024; Brandt et al. 2026), CC BY 4.0, via Source Cooperative",
   "bairros": "IBGE, malha de bairros do Censo 2022"
  },
  "cenas_landsat": [
@@ -298,5 +299,32 @@
    "nuvem": 1.01607,
    "hexagonos": 32215
   }
- ]
+ ],
+ "copas_tiles": [
+  {
+   "quadkey": 2101012100,
+   "start": "2010-03-18",
+   "end": "2019-08-20",
+   "n": 22
+  },
+  {
+   "quadkey": 2101012101,
+   "start": "2017-07-11",
+   "end": "2019-11-29",
+   "n": 14
+  },
+  {
+   "quadkey": 2101012102,
+   "start": "2015-02-20",
+   "end": "2019-09-05",
+   "n": 14
+  },
+  {
+   "quadkey": 2101012103,
+   "start": "2014-11-30",
+   "end": "2019-11-29",
+   "n": 17
+  }
+ ],
+ "hex_perda_copa": 795
 }

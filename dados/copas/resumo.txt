@@ -1,0 +1,32 @@
+Mirá · exploração de copas com o CHMv2 (Meta/WRI) · Manaus
+Copa = pixel com altura ≥ 3 m. Dados: CHMv2, CC BY 4.0 (Tolan et al. 2024; Brandt et al. 2026).
+Tiles: 2101012100, 2101012101, 2101012102, 2101012103
+Datas das imagens de origem:
+   quadkey  acq_start    acq_end  acq_n
+2101012100 2010-03-18 2019-08-20     22
+2101012101 2017-07-11 2019-11-29     14
+2101012102 2015-02-20 2019-09-05     14
+2101012103 2014-11-30 2019-11-29     17
+
+Hexágonos com copa medida: 32216 de 32216
+Pixels com valor 0 (chão ou sem dado), média por hexágono: 50%
+
+Cobertura média          NDVI ≥ 0,5 (atual)   copa ≥ 3 m (CHMv2)
+  todos os hexágonos      50.5%               46.0%
+  elegíveis               17.9%               20.8%
+
+Correlação entre as duas coberturas: Pearson 0.87 · Spearman 0.87
+'Verde que não é árvore' (NDVI diz ≥ 50% de vegetação, CHMv2 < 20% de copa): 784 hexágonos
+Excluídos como 'vegetação densa' com menos de 30% de copa: 674 de 14183 (candidatos a gramado/campo, que poderiam receber plantio)
+
+Qual cobertura explica melhor o calor de superfície? (regressão simples, sem água nem aeroporto)
+  NDVI:   -0.83 °C por +10 pontos de cobertura · R² = 0.79  (n = 30313)
+  copas:  -0.84 °C por +10 pontos de copa      · R² = 0.71  (n = 30313)
+
+Se o fator 'falta de verde' passasse a ser 'falta de copa' (pesos padrão, entre os elegíveis medidos):
+  correlação de postos entre os dois índices: 0.94
+  prioridade muito alta: 1626 hoje → 1627 com copas; 1139 continuam (70%), 488 entram, 487 saem
+  bairros que mais perdem hexágonos de prioridade muito alta: São José Operário (-44), Coroado (-31), Novo Aleixo (-22), Jorge Teixeira (-18), Gilberto Mestrinho (-15)
+  bairros que mais ganham: Flores (+44), Parque 10 de Novembro (+35), Lago Azul (+33), Monte das Oliveiras (+18), Nova Cidade (+16)
+
+Lírio do Vale: cobertura NDVI 20.0% · copa 19.3% · altura média das copas 7.9 m

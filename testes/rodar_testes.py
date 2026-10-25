@@ -7,7 +7,8 @@ tmp = Path(tempfile.mkdtemp(prefix="plantio_teste_"))
 shutil.copy(RAIZ / "dados" / "entrada" / "bairros.geojson", tmp / "dados" / "entrada")
 env = {**os.environ, "PLANTIO_RAIZ": str(tmp)}
 passos = [["pipeline/01_grade.py"], ["testes/sintetico_satelite.py"], ["testes/sintetico_populacao.py"],
-          ["testes/sintetico_osm.py"], ["pipeline/06_indice.py"]]
+          ["testes/sintetico_osm.py"], ["testes/sintetico_copas.py"], ["pipeline/07_indice.py"],
+          ["pipeline/08_web.py"]]
 for p in passos:
     print(f"\n>>> {p[0]}", flush=True)
     r = subprocess.run([sys.executable, str(RAIZ / p[0])], env=env, cwd=tmp)

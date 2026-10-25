@@ -1,8 +1,9 @@
-"""Etapa 6 — índice de prioridade de plantio por hexágono.
+"""Etapa 7 — índice de prioridade de plantio por hexágono.
 
 1. Exclusões (o hexágono não recebe índice):
-     água (> 50% do hexágono), área aeroportuária, vegetação já densa (cobertura ≥ 60%: proteger,
-     não plantar) e falta de dado de satélite.
+     água (> 50% do hexágono), área aeroportuária, vegetação já densa (cobertura ≥ 60% pelo NDVI
+     E copa de árvore ≥ 30% pelo CHMv2: proteger, não plantar) e falta de dado de satélite.
+     Exigir copa evita tratar gramado, pasto e campo como mata a proteger.
 2. Três fatores, cada um convertido em percentil (0–1) entre os hexágonos elegíveis:
      calor    anomalia de temperatura de superfície (etapa 2)
      verde    falta de vegetação: NDVI baixo (etapa 3)
@@ -14,7 +15,9 @@
 6. Tipo de oportunidade (não entra no índice; orienta quem planeja o plantio), o primeiro que se aplica:
      praça ou área pública (≥ 500 m²) · escola ou creche · avenida com canteiro (≥ 100 m de via principal)
      · ruas locais (≥ 100 m; depende de calçada, a confirmar em campo) · sem registro no OpenStreetMap
-7. Relação vegetação–calor: regressão da anomalia de superfície sobre a cobertura vegetal, com
+7. Provável perda de copa: o CHMv2 (imagens de 2010–2019) tinha pelo menos 30 pontos a mais de
+   copa do que a cobertura vegetal atual (Sentinel-2). Informativo; não entra no índice.
+8. Relação vegetação–calor: regressão da anomalia de superfície sobre a cobertura vegetal, com
    intervalo de confiança por bootstrap de bairros inteiros (hexágonos vizinhos não são independentes).
 
 Saídas em public/data/: hexagonos.csv, bairros.csv, relacao.json, meta.json
@@ -29,6 +32,8 @@ from comum import AREA_HEX_M2, INTER, SAIDA, carregar_grade, gravar_json, log
 
 OPORTUNIDADES = ["praça ou área pública", "escola ou creche", "avenida com canteiro", "ruas locais",
                  "sem registro no OpenStreetMap"]
+COPA_MATA = 0.3     # copa mínima para "vegetação densa (proteger)"
+PERDA_MIN = 0.3     # diferença copa antiga − cobertura atual para "provável perda de copa"
 PESOS_ALTERNATIVOS = {"iguais": (1 / 3, 1 / 3, 1 / 3), "calor": (0.6, 0.2, 0.2),
                       "verde": (0.2, 0.6, 0.2), "pessoas": (0.2, 0.2, 0.6)}
 
@@ -85,14 +90,21 @@ def main(argv=None):
           .merge(ler("vegetacao.parquet"), on="h3", how="left")
           .merge(ler("populacao.parquet"), on="h3", how="left")
           .merge(ler("viabilidade.parquet"), on="h3", how="left"))
+    if (INTER / "copas.parquet").exists():
+        df = df.merge(ler("copas.parquet"), on="h3", how="left")
+    else:
+        log("  aviso: sem copas.parquet (etapa 6); a exclusão de vegetação densa usa só o NDVI")
+        df["copa"], df["altura_copa"] = np.nan, np.nan
     df["aeroporto"] = df["aeroporto"].fillna(False).astype(bool)
 
     df["excluido"] = ""
     df.loc[df.lst_anom_c.isna() | df.ndvi.isna(), "excluido"] = "sem dado de satélite"
-    df.loc[df.cobertura_vegetal >= 0.6, "excluido"] = "vegetação densa (proteger)"
+    mata = (df.cobertura_vegetal >= 0.6) & (df.copa.isna() | (df.copa >= COPA_MATA))
+    df.loc[mata, "excluido"] = "vegetação densa (proteger)"
     df.loc[df.aeroporto, "excluido"] = "área aeroportuária"
     df.loc[df.fracao_agua > 0.5, "excluido"] = "água"
     el = df.excluido == ""
+    df["perda_copa"] = ((df.copa - df.cobertura_vegetal) >= PERDA_MIN) & (df.fracao_agua.fillna(0) < 0.5) & ~df.aeroporto
 
     vuln = df[["idosos", "criancas"]].fillna(0).sum(axis=1)
     df["pessoas_ponderadas"] = df["pop"].fillna(0) + 0.5 * vuln
@@ -119,9 +131,11 @@ def main(argv=None):
     # ---------- saídas ----------
     cols = ["h3", "bairro", "indice", "faixa", "rank_cidade", "rank_bairro", "robusto", "excluido",
             "p_calor", "p_verde", "p_pessoas", "lst_anom_c", "lst_c", "ndvi", "cobertura_vegetal", "fracao_agua",
-            "pop", "idosos", "criancas", "dens_hab_km2", "area_publica_m2", "vias_m", "vias_principais_m", "escolas", "oportunidade"]
+            "pop", "idosos", "criancas", "dens_hab_km2", "area_publica_m2", "vias_m", "vias_principais_m", "escolas", "oportunidade",
+            "copa", "altura_copa", "perda_copa"]
     saida = df[cols].copy()
-    saida[["indice", "p_calor", "p_verde", "p_pessoas"]] = saida[["indice", "p_calor", "p_verde", "p_pessoas"]].round(3)
+    saida[["indice", "p_calor", "p_verde", "p_pessoas", "copa"]] = saida[["indice", "p_calor", "p_verde", "p_pessoas", "copa"]].round(3)
+    saida["altura_copa"] = saida["altura_copa"].round(1)
     saida["faixa"] = saida["faixa"].fillna("")
     for c in ("rank_cidade", "rank_bairro"):
         saida[c] = saida[c].astype("Int64")
@@ -134,12 +148,14 @@ def main(argv=None):
         "area_km2": (df.groupby("bairro").size() * AREA_HEX_M2 / 1e6).round(2),
         "populacao": df.groupby("bairro")["pop"].sum().round(0),
         "cobertura_vegetal_media": terra.groupby("bairro")["cobertura_vegetal"].mean().round(3),
+        "copa_media": terra.groupby("bairro")["copa"].mean().round(3),
+        "hex_perda_copa": df[df.perda_copa].groupby("bairro").size(),
         "anomalia_superficie_media_c": terra.groupby("bairro")["lst_anom_c"].mean().round(2),
         "indice_medio": m.groupby("bairro")["indice"].mean().round(1),
         "hex_muito_alta": m[m.faixa == "muito alta"].groupby("bairro").size(),
         "hex_robustos": m[m.robusto].groupby("bairro").size(),
         "pop_em_muito_alta": m[m.faixa == "muito alta"].groupby("bairro")["pop"].sum().round(0),
-    }).fillna({"hex_muito_alta": 0, "hex_robustos": 0, "pop_em_muito_alta": 0})
+    }).fillna({"hex_muito_alta": 0, "hex_robustos": 0, "pop_em_muito_alta": 0, "hex_perda_copa": 0})
     mt = m[m.faixa == "muito alta"]
     colunas_op = {"praça ou área pública": "mt_praca", "escola ou creche": "mt_escola",
                   "avenida com canteiro": "mt_avenida", "ruas locais": "mt_ruas_locais",
@@ -150,7 +166,7 @@ def main(argv=None):
     resumo[list(colunas_op.values())] = resumo[list(colunas_op.values())].fillna(0)
     resumo["pct_muito_alta"] = (100 * resumo.hex_muito_alta / resumo.hexagonos).round(1)
     resumo["top5_h3"] = m.sort_values("indice", ascending=False).groupby("bairro")["h3"].apply(lambda s: ";".join(s.head(5)))
-    for c in ("hex_muito_alta", "hex_robustos", *colunas_op.values()):
+    for c in ("hex_muito_alta", "hex_robustos", "hex_perda_copa", *colunas_op.values()):
         resumo[c] = resumo[c].astype(int)
     resumo = resumo.sort_values("pop_em_muito_alta", ascending=False)
     resumo.index.name = "bairro"
@@ -174,14 +190,18 @@ def main(argv=None):
             "vegetacao": "ESA Copernicus Sentinel-2 L2A, Microsoft Planetary Computer",
             "populacao": "IBGE, Censo Demográfico 2022, agregados por setor censitário",
             "espaco": "© colaboradores do OpenStreetMap",
+            "copas": "Meta e WRI, CHMv2 (Tolan et al. 2024; Brandt et al. 2026), CC BY 4.0, via Source Cooperative",
             "bairros": "IBGE, malha de bairros do Censo 2022",
         },
         "cenas_landsat": ler_cenas("cenas_landsat.csv"), "cenas_sentinel2": ler_cenas("cenas_sentinel2.csv"),
+        "copas_tiles": ler_cenas("copas_tiles.csv"),
+        "hex_perda_copa": int(df.perda_copa.sum()),
     })
 
     log(f"{el.sum()} de {len(df)} hexágonos elegíveis; exclusões: {df[~el].excluido.value_counts().to_dict()}")
     log(f"{int((df.faixa == 'muito alta').sum())} hexágonos de prioridade muito alta, "
         f"{int(df.robusto.sum())} robustos a qualquer conjunto de pesos")
+    log(f"Provável perda de copa (CHMv2 2010–2019 × Sentinel-2 atual): {int(df.perda_copa.sum())} hexágonos")
     log(f"Relação vegetação–calor: {rel['graus_por_10pp']:+.2f} °C por +10 pp de cobertura "
         f"(IC 95% {rel['ic95_graus_por_10pp'][0]:+.2f} a {rel['ic95_graus_por_10pp'][1]:+.2f}; R² {rel['r2']})")
     log("Bairros com mais moradores em hexágonos de prioridade muito alta:")

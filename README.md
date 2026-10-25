@@ -27,22 +27,23 @@ Antes, copie o `bairros.geojson` do Akub (`public/data/bairros.geojson`) para `d
 | 3 | `03_vegetacao.py` | 15–40 min | até 16 cenas Sentinel-2 (recorte) |
 | 4 | `04_populacao.py` | 2–5 min | ~135 MB do IBGE (fica em cache) |
 | 5 | `05_viabilidade.py` | 1–5 min | OpenStreetMap (Overpass) |
-| 6 | `06_indice.py` | segundos | nada |
-| 7 | `07_web.py` | segundos | nada (gera o `web.json` do site) |
+| 6 | `06_copas.py` | 3–5 min | recorte do CHMv2 (altura das copas, Source Cooperative) |
+| 7 | `07_indice.py` | segundos | nada |
+| 8 | `08_web.py` | segundos | nada (gera o `web.json` do site) |
 
 Para retomar de uma etapa: `python pipeline/rodar_tudo.py --a-partir-de 4`.
-Para testar outros pesos: `python pipeline/rodar_tudo.py --so 6 -- --peso-calor 0.5 --peso-verde 0.3 --peso-pessoas 0.2`.
+Para testar outros pesos: `python pipeline/rodar_tudo.py --so 7 -- --peso-calor 0.5 --peso-verde 0.3 --peso-pessoas 0.2`.
 
 ## Site (fase 2)
 
-O site é estático e fica em `public/`: `index.html`, `app.js` e `data/web.json`, gerado pela etapa 7. Para ver localmente:
+O site é estático e fica em `public/`: `index.html`, `app.js` e `data/web.json`, gerado pela etapa 8. Para ver localmente:
 
 ```bash
 cd public
 python -m http.server 8000      # abra http://localhost:8000
 ```
 
-Tem o mapa dos hexágonos (prioridade, calor, vegetação e moradores), a ficha de cada hexágono com a explicação do porquê, os pesos ajustáveis, o ranking dos bairros, o relatório por bairro para imprimir ou salvar em PDF, a relação vegetação–calor e o download dos dados.
+Tem o mapa dos hexágonos (prioridade, calor, vegetação, moradores, copas e perda de copa), a ficha de cada hexágono com a explicação do porquê, os pesos ajustáveis, o ranking dos bairros, o relatório por bairro para imprimir ou salvar em PDF, a relação vegetação–calor e o download dos dados.
 
 **Publicar no Vercel:** suba o projeto para um repositório no GitHub e importe no Vercel com o Framework Preset "Other". O Vercel serve a pasta `public` automaticamente. Lembre de configurar o Git com a identidade da conta dona do projeto (`git config --local user.email`), como no Akub.
 
@@ -50,10 +51,10 @@ Tem o mapa dos hexágonos (prioridade, calor, vegetação e moradores), a ficha 
 
 | Arquivo | Conteúdo |
 |---|---|
-| `hexagonos.csv` | Uma linha por hexágono: índice, faixa, posição na cidade e no bairro, robustez, motivo de exclusão, os três percentis e os dados brutos de cada fator |
-| `bairros.csv` | Por bairro: população, cobertura vegetal média, anomalia de superfície média, quantos hexágonos e moradores estão em prioridade muito alta, a divisão desses hexágonos por tipo de oportunidade, e os 5 hexágonos mais prioritários |
+| `hexagonos.csv` | Uma linha por hexágono: índice, faixa, posição na cidade e no bairro, robustez, motivo de exclusão, os três percentis, os dados brutos de cada fator, a copa de árvores e o indício de perda de copa |
+| `bairros.csv` | Por bairro: população, cobertura vegetal média, anomalia de superfície média, quantos hexágonos e moradores estão em prioridade muito alta, a divisão desses hexágonos por tipo de oportunidade, a copa média, os hexágonos com provável perda de copa e os 5 hexágonos mais prioritários |
 | `relacao.json` | Relação observada entre cobertura vegetal e temperatura de superfície em Manaus, com intervalo de confiança |
-| `meta.json` | Pesos, fontes, cenas de satélite usadas e data de geração |
+| `meta.json` | Pesos, fontes, cenas de satélite usadas, período das imagens do CHMv2 e data de geração |
 
 ## Metodologia
 
@@ -67,7 +68,9 @@ Tem o mapa dos hexágonos (prioridade, calor, vegetação e moradores), a ficha 
 
 **Tipo de oportunidade.** OpenStreetMap: praças, parques, jardins e gramados (área), escolas e creches (contagem), avenidas e vias principais (comprimento), ruas locais (comprimento) e área aeroportuária. Cada hexágono recebe o primeiro tipo que se aplica: **praça ou área pública** (≥ 500 m²; plantio em terreno público), **escola ou creche** (parceria e educação ambiental), **avenida com canteiro** (≥ 100 m de via principal; arborização viária), **ruas locais** (≥ 100 m; depende da largura da calçada, a confirmar em campo) ou **sem registro no OpenStreetMap**. O tipo não entra no índice: o OpenStreetMap é incompleto e não informa a largura das calçadas, então a falta de registro não significa falta de espaço.
 
-**Exclusões.** Não recebem índice os hexágonos com mais de 50% de água, em área aeroportuária, com vegetação já densa (cobertura ≥ 60%, áreas a proteger, e não a plantar) ou sem dado de satélite.
+**Copas de árvores.** Mapa de altura das copas CHMv2 (Meta e WRI; Tolan et al. 2024; Brandt et al. 2026; CC BY 4.0), com ~1,2 m por pixel, gerado por um modelo de visão computacional (DINOv3) sobre imagens de satélite de alta resolução. Só o recorte de Manaus é lido, direto do Source Cooperative. Por hexágono: fração de pixels com altura ≥ 3 m (copa, o que separa árvore de gramado) e altura média das copas. As imagens de origem em Manaus são de 2010 a 2019, conforme o tile; por isso a copa não substitui o NDVI recente no índice. Ela tem dois usos: refinar a exclusão de vegetação densa e indicar **provável perda de copa**, quando o CHMv2 tem pelo menos 30 pontos a mais de copa do que a cobertura vegetal atual (desmatamento ou obra depois das imagens). Na comparação com o NDVI, a correlação foi de 0,87 em 32 mil hexágonos; o NDVI explicou um pouco melhor o calor de superfície (R² 0,79 contra 0,71). A análise exploratória está em `explorar/copas_chmv2.py`.
+
+**Exclusões.** Não recebem índice os hexágonos com mais de 50% de água, em área aeroportuária, com vegetação já densa (cobertura ≥ 60% **e** copa de árvores ≥ 30%: áreas a proteger, e não a plantar; gramados e pastos continuam no índice) ou sem dado de satélite.
 
 **Índice.** Entre os hexágonos elegíveis, cada fator vira um percentil de 0 a 1: calor (anomalia de superfície), verde (NDVI, invertido) e pessoas (moradores + 50% a mais para idosos e crianças). Índice = 100 × média ponderada, com pesos padrão de 0,4, 0,3 e 0,3. Faixas: muito alta (10% mais prioritários), alta (75–90), média (50–75) e baixa (metade de baixo).
 
@@ -78,11 +81,11 @@ Tem o mapa dos hexágonos (prioridade, calor, vegetação e moradores), a ficha 
 ## Limites
 
 - Temperatura de superfície não é temperatura do ar, e as cenas são de ~10h.
-- O NDVI de 10 m não separa árvores de gramado; a segmentação de copas fica para a fase 3.
+- O NDVI de 10 m não separa árvores de gramado; a copa do CHMv2 separa, mas é de 2010–2019 e a "perda de copa" é um indício a conferir em campo.
 - A distribuição da população dentro do setor é uma estimativa.
 - O OpenStreetMap não registra todas as praças e calçadas de Manaus.
 - A malha de bairros é a do Censo 2022 (63 bairros); a Colônia Japonesa (Lei 3.592/2025) ainda não está nela.
 
 ## Testes
 
-`python testes/rodar_testes.py` roda o pipeline inteiro com dados sintéticos de cada etapa (satélite, população no formato do IBGE e OpenStreetMap), sem rede e numa pasta temporária: não toca em `dados/` nem em `public/`.
+`python testes/rodar_testes.py` roda o pipeline inteiro com dados sintéticos de cada etapa (satélite, população no formato do IBGE, OpenStreetMap e mapa de copas), sem rede e numa pasta temporária: não toca em `dados/` nem em `public/`.

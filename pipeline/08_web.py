@@ -1,4 +1,4 @@
-"""Etapa 7 — dados compactos para o site (public/data/web.json).
+"""Etapa 8 — dados compactos para o site (public/data/web.json).
 
 Formato colunar: cada campo é uma lista com um valor por hexágono, na mesma ordem. Números são
 inteiros escalados (por exemplo, percentil × 1000) para o arquivo ficar pequeno. O site recalcula o
@@ -50,6 +50,10 @@ def main(argv=None):
         "praca": inteiro(h.area_publica_m2, 1, 0), "vias": inteiro(h.vias_m, 1, 0),
         "viasp": inteiro(h.vias_principais_m, 1, 0), "escolas": inteiro(h.escolas, 1, 0),
     }
+    if "copa" in h.columns:
+        web["copa"] = inteiro(h.copa, 100)            # % de copa de árvore (CHMv2)
+        web["altc"] = inteiro(h.altura_copa, 1)       # altura média das copas (m)
+        web["perda"] = [1 if str(x) == "True" else 0 for x in h.perda_copa]
     resumo = []
     for _, r in b.iterrows():
         resumo.append({k: (None if pd.isna(v) else (v.item() if isinstance(v, np.generic) else v)) for k, v in r.items()})
@@ -60,6 +64,10 @@ def main(argv=None):
                                          "pesos_alternativos_robustez")}
     web["meta"]["n_cenas_landsat"] = len(meta.get("cenas_landsat", []))
     web["meta"]["n_cenas_sentinel2"] = len(meta.get("cenas_sentinel2", []))
+    tiles = meta.get("copas_tiles", [])
+    anos = [str(t.get(k, ""))[:4] for t in tiles for k in ("start", "end") if t.get(k)]
+    web["meta"]["copas_periodo"] = f"{min(anos)}–{max(anos)}" if anos else None
+    web["meta"]["hex_perda_copa"] = meta.get("hex_perda_copa")
     destino = SAIDA / "web.json"
     destino.write_text(json.dumps(web, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     log(f"  gravado {destino.name}: {destino.stat().st_size / 1e6:.1f} MB para {len(h)} hexágonos")

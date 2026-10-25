@@ -1,0 +1,27 @@
+Mirá · exploração de copas com o CHMv2 (Meta/WRI) · Lírio do Vale
+Copa = pixel com altura ≥ 3 m. Dados: CHMv2, CC BY 4.0 (Tolan et al. 2024; Brandt et al. 2026).
+Tiles: 2101012101
+Datas das imagens de origem:
+   quadkey  acq_start    acq_end  acq_n
+2101012101 2017-07-11 2019-11-29     14
+
+Hexágonos com copa medida: 129 de 129
+Pixels com valor 0 (chão ou sem dado), média por hexágono: 77%
+
+Cobertura média          NDVI ≥ 0,5 (atual)   copa ≥ 3 m (CHMv2)
+  todos os hexágonos      20.0%               19.3%
+  elegíveis                9.6%               13.5%
+
+Correlação entre as duas coberturas: Pearson 0.78 · Spearman 0.80
+'Verde que não é árvore' (NDVI diz ≥ 50% de vegetação, CHMv2 < 20% de copa): 2 hexágonos
+Excluídos como 'vegetação densa' com menos de 30% de copa: 3 de 17 (candidatos a gramado/campo, que poderiam receber plantio)
+
+Qual cobertura explica melhor o calor de superfície? (regressão simples, sem água nem aeroporto)
+  NDVI:   -0.56 °C por +10 pontos de cobertura · R² = 0.74  (n = 125)
+  copas:  -0.57 °C por +10 pontos de copa      · R² = 0.50  (n = 125)
+
+Se o fator 'falta de verde' passasse a ser 'falta de copa' (pesos padrão, entre os elegíveis medidos):
+  correlação de postos entre os dois índices: 0.94
+  prioridade muito alta: 11 hoje → 11 com copas; 8 continuam (73%), 3 entram, 3 saem
+
+Lírio do Vale: cobertura NDVI 20.0% · copa 19.3% · altura média das copas 7.9 m
