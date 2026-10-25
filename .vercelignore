@@ -1,0 +1,8 @@
+.env
+.venv/
+cache/
+dados/
+explorar/
+pipeline/
+testes/
+__pycache__/

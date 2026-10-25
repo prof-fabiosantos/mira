@@ -1,12 +1,6 @@
+# Servidor do assistente (o que roda no Vercel). O pipeline usa requirements-pipeline.txt.
+fastapi>=0.110
+uvicorn>=0.29
+requests>=2.31
 h3>=4
-numpy
-pandas
-pyarrow
-geopandas
-shapely
-pyproj
-rasterio
-requests
-pystac-client
-planetary-computer
-osmnx
+python-dotenv>=1.0

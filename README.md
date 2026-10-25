@@ -12,7 +12,7 @@ cada local (fiação, calçada, tubulação, solo) dependem de avaliação técn
 ```bash
 python -m venv .venv
 .venv\Scripts\activate            # Windows (Linux/macOS: source .venv/bin/activate)
-pip install -r requirements.txt
+pip install -r requirements-pipeline.txt
 
 python pipeline/rodar_tudo.py     # todas as etapas
 ```
@@ -45,7 +45,35 @@ python -m http.server 8000      # abra http://localhost:8000
 
 Tem o mapa dos hexágonos (prioridade, calor, vegetação, moradores, copas e perda de copa), a ficha de cada hexágono com a explicação do porquê, os pesos ajustáveis, o ranking dos bairros, o relatório por bairro para imprimir ou salvar em PDF, a relação vegetação–calor e o download dos dados.
 
-**Publicar no Vercel:** suba o projeto para um repositório no GitHub e importe no Vercel com o Framework Preset "Other". O Vercel serve a pasta `public` automaticamente. Lembre de configurar o Git com a identidade da conta dona do projeto (`git config --local user.email`), como no Akub.
+**Publicar no Vercel:** suba o projeto para um repositório no GitHub e importe no Vercel com o Framework Preset "Other". O Vercel serve a pasta `public` e transforma `api/index.py` numa função Python (o assistente). Lembre de configurar o Git com a identidade da conta dona do projeto (`git config --local user.email`), como no Akub.
+
+## Assistente (Jev + Gemini)
+
+A seção "Pergunte ao Mirá" responde sobre o ponto selecionado, um bairro ou a cidade, e redige ofícios prontos para pedir o plantio (botão "Redigir ofício" no relatório do bairro). O LLM não calcula nada:
+
+1. **Jev** (TypeSafe) interpreta a pergunta: intenção (explicar um ponto, onde plantar, comparar bairros, panorama da cidade, como funciona, redigir documento, fora do tema) e, para documentos, o destinatário.
+2. **Código** identifica os bairros citados (ou usa o bairro e o hexágono em foco no mapa) e monta os fatos com o mesmo `web.json` e **os mesmos pesos** que a pessoa está vendo.
+3. **Gemini** redige a resposta ou o ofício só com esses fatos.
+4. **Servidor** confere cada número do texto contra os fatos. Se algum não tiver fonte, o texto é descartado e vai a versão de modelo, que também é completa. Sem chaves, tudo funciona com o Jev simulado e os textos de modelo.
+
+```
+api/index.py          FastAPI: /api/agente e /api/status (função Python no Vercel)
+api/_agente/          dados.py (índice e consultas), decisao.py (fluxo), jev.py, gemini.py
+public/agente.js      painel de conversa e trilha de decisão
+```
+
+Rodar localmente:
+
+```bash
+pip install -r requirements.txt
+copy .env.example .env                       # Windows (Linux/macOS: cp) — preencha as chaves
+uvicorn api.index:app --reload --port 8000   # abra http://localhost:8000
+python testes/teste_agente.py                # testes sem rede
+```
+
+No Vercel, cadastre em Settings → Environment Variables: `TYPESAFE_API_KEY`, `GEMINI_API_KEY`, `GEMINI_MODEL` e `GEMINI_MODEL_RESERVA` (os mesmos do Akub). Opcionais: `LIMITE_POR_MINUTO`, `LIMITE_POR_DIA`. Depois do deploy, `https://SEU-PROJETO.vercel.app/api/status` deve responder `{"jev":"TypeSafe","redacao":"Gemini"}`. O `.env` nunca vai para o Git (está no `.gitignore`).
+
+O `requirements.txt` da raiz tem só o que o servidor usa (o Vercel instala esse arquivo); o pipeline usa `requirements-pipeline.txt`.
 
 ## Saídas (`public/data/`)
 

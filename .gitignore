@@ -4,3 +4,5 @@ cache/
 dados/entrada/ibge/
 dados/intermediario/
 testes/tmp/
+.env
+.vercel/

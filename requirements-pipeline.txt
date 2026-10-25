@@ -1,0 +1,14 @@
+# Pipeline de dados (roda só no seu computador): python pipeline/rodar_tudo.py
+h3>=4
+numpy
+pandas
+pyarrow
+geopandas
+shapely
+pyproj
+rasterio
+requests
+pystac-client
+planetary-computer
+osmnx
+matplotlib

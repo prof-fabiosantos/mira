@@ -9,7 +9,7 @@
   let D, N, B, cent, idxCell, bairroHex;
   let pesos = { calor: 0.4, verde: 0.3, pessoas: 0.3 };
   let indice, faixa, rankCidade, rankBairro, nEleg;
-  let camada = "prioridade", soRobustos = false, sel = null, map, layer;
+  let camada = "prioridade", soRobustos = false, sel = null, foco = null, map, layer;
 
   const COR_FAIXA = () => [css("--f0"), css("--f1"), css("--f2"), css("--f3")];
   const COR_EXCL = () => [null, css("--agua"), css("--aero"), css("--mata"), css("--semdado")];
@@ -280,7 +280,7 @@
     $("relConteudo").innerHTML = `
       <div class="cab"><div><h2>Relatório de prioridade de plantio: ${nome}</h2><p class="sub" style="margin:0">Mirá · onde plantar árvores em Manaus</p>
         <p class="sub">Manaus · gerado em ${hoje} · pesos: calor ${Math.round(pesos.calor * 100)}%, falta de verde ${Math.round(pesos.verde * 100)}%, moradores ${Math.round(pesos.pessoas * 100)}% · dados de ${D.gerado_em.split("-").reverse().join("/")}</p></div>
-        <div class="controles noprint"><button class="btn" type="button" id="relMapa">Ver no mapa</button><button class="btn prim" type="button" id="relImprimir">Imprimir ou salvar PDF</button></div></div>
+        <div class="controles noprint"><button class="btn" type="button" id="relMapa">Ver no mapa</button><button class="btn" type="button" id="relOficio">Redigir ofício</button><button class="btn prim" type="button" id="relImprimir">Imprimir ou salvar PDF</button></div></div>
       <div class="nums">
         <div><b>${fmt(a.pop)}</b><span>moradores no bairro</span></div>
         <div><b>${fmt(a.hexMt)}</b><span>hexágonos de prioridade muito alta (${fmt(a.pctMt, 1)}% do bairro)</span></div>
@@ -302,12 +302,16 @@
       <p class="sub" style="margin-top:12px">Índice de 0 a 100 que combina calor de superfície (Landsat), falta de vegetação (Sentinel-2) e moradores (Censo 2022, com peso extra para idosos e crianças de 0 a 4 anos). Indica onde priorizar; espécies e viabilidade de cada local (calçada, fiação, tubulação) dependem de avaliação técnica em campo. Metodologia e dados abertos no site.</p>`;
     $("relatorio").hidden = false;
     $("relMapa").addEventListener("click", () => { irPara(k); $("mapa-sec").scrollIntoView({ behavior: "smooth" }); });
+    $("relOficio").addEventListener("click", () => {
+      if (window.miraAgente) window.miraAgente.perguntar(`Redija um ofício para a prefeitura pedindo o plantio de árvores no bairro ${nome}.`, { bairro: nome });
+    });
     $("relImprimir").addEventListener("click", () => { document.body.classList.add("imprimir"); window.print(); });
     if (rolar) $("relatorio").scrollIntoView({ behavior: "smooth" });
   }
   window.addEventListener("afterprint", () => document.body.classList.remove("imprimir"));
 
   function irPara(k) {
+    foco = k;
     const h = bairroHex[k];
     let a = 90, b = -90, c = 180, d = -180;
     for (const i of h) { a = Math.min(a, cent[2 * i]); b = Math.max(b, cent[2 * i]); c = Math.min(c, cent[2 * i + 1]); d = Math.max(d, cent[2 * i + 1]); }
@@ -426,7 +430,7 @@
     map.on("click", (e) => {
       const i = idxCell.get(h3.latLngToCell(e.latlng.lat, e.latlng.lng, 10));
       if (i == null) return;
-      sel = i; ficha(i); layer.redraw();
+      sel = i; foco = D.bairro[i]; ficha(i); layer.redraw();
     });
     if (!D.copa) document.querySelectorAll('[data-camada="copa"],[data-camada="perda"]').forEach((b) => b.remove());
     controles();
@@ -436,6 +440,21 @@
     // começa no hexágono mais prioritário da cidade
     let topo = 0; for (let i = 0; i < N; i++) if (rankCidade[i] === 1) topo = i;
     sel = topo; ficha(topo); layer.redraw();
+    // ponte com o assistente (agente.js)
+    window.miraApp = {
+      contexto: () => ({
+        hexagono: sel != null ? D.h3[sel] : null,
+        bairro: foco != null ? B[foco] : null,
+        pesos: { ...pesos },
+      }),
+      selecionar: (h) => {
+        const i = idxCell.get(h);
+        if (i == null) return;
+        sel = i; foco = D.bairro[i]; ficha(i); layer.redraw();
+        map.setView([cent[2 * i], cent[2 * i + 1]], 16);
+        $("mapa-sec").scrollIntoView({ behavior: "smooth" });
+      },
+    };
   }
   init().catch((e) => { console.error(e.stack); $("mapa").innerHTML = `<div class="carregando">Não foi possível carregar os dados (${e.message}). Rode a etapa 8 do pipeline e abra o site por um servidor (python -m http.server).</div>`; });
 })();

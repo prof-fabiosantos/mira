@@ -136,6 +136,30 @@ footer .wrap{padding-block:22px 34px;color:var(--muted);font-size:12.5px;border-
   body.imprimir #relatorio{display:block!important}
   a{color:#000}
 }
+
+/* assistente */
+.chat{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:20px}
+@media (max-width:880px){.chat{grid-template-columns:1fr}}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.chip{font:inherit;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:12.5px;cursor:pointer;color:var(--ink)}
+.chip:hover{border-color:var(--accent)}
+.msgs{display:flex;flex-direction:column;gap:10px;max-height:520px;overflow-y:auto;margin:10px 0;padding-right:4px}
+.msg{padding:10px 12px;border-radius:10px;max-width:92%;white-space:pre-wrap;min-width:0;font-size:14.5px}
+.msg.eu{align-self:flex-end;background:var(--accent);color:var(--accent-ink)}
+.msg.agente{align-self:flex-start;background:var(--bg);border:1px solid var(--line)}
+.msg.doc{align-self:stretch;max-width:100%;background:var(--surface);border:1px solid var(--line);font-family:Georgia,"Times New Roman",serif;font-size:14px;line-height:1.55}
+.msg .meta{display:block;margin-top:6px;font-family:var(--f-data);font-size:10.5px;color:var(--muted);white-space:normal}
+.msg .acoes{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;font-family:var(--f-body,inherit)}
+.ask{display:flex;gap:8px}
+.ask input{flex:1;min-width:0;font:inherit;font-size:14.5px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+.trail{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px;font-size:13px}
+.trail li{border-left:3px solid var(--line);padding:2px 0 2px 10px;min-width:0;overflow-wrap:anywhere}
+.trail li.ok{border-color:var(--accent)} .trail li.fix{border-color:#c07a2c} .trail li.stop{border-color:var(--perda)}
+.trail b{display:block;font-family:var(--f-data);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.note{font-size:12.5px;color:var(--muted);margin:8px 0 0}
+body.imprimir-doc>*:not(#docImpressao){display:none!important}
+#docImpressao{display:none}
+body.imprimir-doc #docImpressao{display:block;white-space:pre-wrap;font-family:Georgia,"Times New Roman",serif;font-size:12pt;line-height:1.5;padding:2cm;color:#000;background:#fff}
 </style>
 </head>
 <body>
@@ -144,7 +168,7 @@ footer .wrap{padding-block:22px 34px;color:var(--muted);font-size:12.5px;border-
     <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="9" fill="#1f5f37"/><path d="M20 6c-6 0-10 5-10 10 0 5 4 9 10 9s10-4 10-9c0-5-4-10-10-10z" fill="#89c48b"/><rect x="18.6" y="22" width="2.8" height="12" rx="1.2" fill="#f2e6c4"/></svg>
     <span class="brand-txt"><span class="brand-linha"><span class="brand-nome">Mirá</span><span class="brand-lema">Onde plantar árvores</span></span><small>árvore em nheengatu · Manaus</small></span>
   </a>
-  <nav><a href="#mapa-sec">Mapa</a><a href="#bairros">Bairros</a><a href="#relacao">Verde e calor</a><a href="#metodologia">Metodologia</a><a class="nav-ext" href="https://akub-alpha.vercel.app/" target="_blank" rel="noopener" title="Akub: calor urbano em Manaus">Akub ↗</a></nav>
+  <nav><a href="#mapa-sec">Mapa</a><a href="#assistente">Assistente</a><a href="#bairros">Bairros</a><a href="#relacao">Verde e calor</a><a href="#metodologia">Metodologia</a><a class="nav-ext" href="https://akub-alpha.vercel.app/" target="_blank" rel="noopener" title="Akub: calor urbano em Manaus">Akub ↗</a></nav>
 </div></header>
 
 <main>
@@ -185,6 +209,26 @@ footer .wrap{padding-block:22px 34px;color:var(--muted);font-size:12.5px;border-
     <label>Falta de verde <output id="oVerde">30%</output><input type="range" id="wVerde" min="0" max="100" value="30"></label>
     <label>Moradores <output id="oPessoas">30%</output><input type="range" id="wPessoas" min="0" max="100" value="30"></label>
     <button class="btn" type="button" id="resetPesos">Voltar ao padrão</button>
+  </div>
+</div></div></section>
+
+<section id="assistente"><div class="wrap"><div class="panel chat">
+  <div>
+    <h2>Pergunte ao Mirá</h2>
+    <p class="sub">Pergunte sobre o ponto selecionado, um bairro ou a cidade, ou peça um ofício pronto para pedir o plantio. As respostas usam os mesmos dados e pesos do mapa.</p>
+    <div class="chips" id="chips"></div>
+    <div class="msgs" id="msgs" aria-live="polite"></div>
+    <form class="ask" id="askForm">
+      <label for="q" hidden>Pergunta</label>
+      <input id="q" autocomplete="off" maxlength="600" placeholder="Ex.: Onde vale plantar árvores no Japiim?">
+      <button class="btn prim" type="submit" id="askBtn">Perguntar</button>
+    </form>
+    <p class="note" id="agStatus">Conectando ao assistente…</p>
+  </div>
+  <div>
+    <h2>Como o assistente decidiu</h2>
+    <p class="sub">Cada etapa da última resposta. O Jev interpreta, o código busca os dados, o Gemini só redige com eles e o servidor confere cada número.</p>
+    <ul class="trail" id="trail"><li>Faça uma pergunta para ver as decisões.</li></ul>
   </div>
 </div></div></section>
 
@@ -240,5 +284,7 @@ footer .wrap{padding-block:22px 34px;color:var(--muted);font-size:12.5px;border-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/h3-js@4.1.0/dist/h3-js.umd.js"></script>
 <script src="app.js"></script>
+<script src="agente.js"></script>
+<div id="docImpressao"></div>
 </body>
 </html>
