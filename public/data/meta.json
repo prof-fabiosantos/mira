@@ -1,0 +1,302 @@
+{
+ "gerado_em": "2026-10-25",
+ "grade": "H3 resolução 10 (~15 mil m² por hexágono)",
+ "pesos": {
+  "calor": 0.4,
+  "verde": 0.3,
+  "pessoas": 0.3
+ },
+ "pesos_alternativos_robustez": {
+  "iguais": [
+   0.3333333333333333,
+   0.3333333333333333,
+   0.3333333333333333
+  ],
+  "calor": [
+   0.6,
+   0.2,
+   0.2
+  ],
+  "verde": [
+   0.2,
+   0.6,
+   0.2
+  ],
+  "pessoas": [
+   0.2,
+   0.2,
+   0.6
+  ]
+ },
+ "hexagonos": 32216,
+ "elegiveis": 16262,
+ "exclusoes": {
+  "vegetação densa (proteger)": 14183,
+  "água": 1065,
+  "sem dado de satélite": 435,
+  "área aeroportuária": 271
+ },
+ "fontes": {
+  "calor": "USGS Landsat 8/9 C2 L2 (ST_B10), Microsoft Planetary Computer",
+  "vegetacao": "ESA Copernicus Sentinel-2 L2A, Microsoft Planetary Computer",
+  "populacao": "IBGE, Censo Demográfico 2022, agregados por setor censitário",
+  "espaco": "© colaboradores do OpenStreetMap",
+  "bairros": "IBGE, malha de bairros do Censo 2022"
+ },
+ "cenas_landsat": [
+  {
+   "id": "LC09_L2SP_231062_20230723_02_T1",
+   "data": "2023-07-23",
+   "cobertura": 0.949,
+   "mediana_c": 37.94
+  },
+  {
+   "id": "LC08_L2SP_231062_20230731_02_T1",
+   "data": "2023-07-31",
+   "cobertura": 0.913,
+   "mediana_c": 36.1
+  },
+  {
+   "id": "LC09_L2SP_231062_20230808_02_T1",
+   "data": "2023-08-08",
+   "cobertura": 0.955,
+   "mediana_c": 42.32
+  },
+  {
+   "id": "LC09_L2SP_231062_20230824_02_T1",
+   "data": "2023-08-24",
+   "cobertura": 0.971,
+   "mediana_c": 33.4
+  },
+  {
+   "id": "LC08_L2SP_231062_20230901_02_T1",
+   "data": "2023-09-01",
+   "cobertura": 0.883,
+   "mediana_c": 40.36
+  },
+  {
+   "id": "LC09_L2SP_231062_20230909_02_T1",
+   "data": "2023-09-09",
+   "cobertura": 0.957,
+   "mediana_c": 42.01
+  },
+  {
+   "id": "LC09_L2SP_231062_20230925_02_T1",
+   "data": "2023-09-25",
+   "cobertura": 0.851,
+   "mediana_c": 43.43
+  },
+  {
+   "id": "LC08_L2SP_231062_20231003_02_T1",
+   "data": "2023-10-03",
+   "cobertura": 0.803,
+   "mediana_c": 40.01
+  },
+  {
+   "id": "LC09_L2SP_231062_20231011_02_T1",
+   "data": "2023-10-11",
+   "cobertura": 0.981,
+   "mediana_c": 45.58
+  },
+  {
+   "id": "LC08_L2SP_231062_20231019_02_T1",
+   "data": "2023-10-19",
+   "cobertura": 0.856,
+   "mediana_c": 29.83
+  },
+  {
+   "id": "LC08_L2SP_231062_20240701_02_T1",
+   "data": "2024-07-01",
+   "cobertura": 0.817,
+   "mediana_c": 38.46
+  },
+  {
+   "id": "LC09_L2SP_231062_20240709_02_T1",
+   "data": "2024-07-09",
+   "cobertura": 0.834,
+   "mediana_c": 37.39
+  },
+  {
+   "id": "LC08_L2SP_231062_20240717_02_T1",
+   "data": "2024-07-17",
+   "cobertura": 0.88,
+   "mediana_c": 35.29
+  },
+  {
+   "id": "LC08_L2SP_231062_20240802_02_T1",
+   "data": "2024-08-02",
+   "cobertura": 0.844,
+   "mediana_c": 39.41
+  },
+  {
+   "id": "LC09_L2SP_231062_20240810_02_T1",
+   "data": "2024-08-10",
+   "cobertura": 0.84,
+   "mediana_c": 39.58
+  },
+  {
+   "id": "LC08_L2SP_231062_20240818_02_T1",
+   "data": "2024-08-18",
+   "cobertura": 0.964,
+   "mediana_c": 39.79
+  },
+  {
+   "id": "LC09_L2SP_231062_20240911_02_T1",
+   "data": "2024-09-11",
+   "cobertura": 0.964,
+   "mediana_c": 40.38
+  },
+  {
+   "id": "LC08_L2SP_231062_20241021_02_T1",
+   "data": "2024-10-21",
+   "cobertura": 0.981,
+   "mediana_c": 40.84
+  },
+  {
+   "id": "LC09_L2SP_231062_20250728_02_T1",
+   "data": "2025-07-28",
+   "cobertura": 0.957,
+   "mediana_c": 38.7
+  },
+  {
+   "id": "LC08_L2SP_231062_20250805_02_T1",
+   "data": "2025-08-05",
+   "cobertura": 0.957,
+   "mediana_c": 40.04
+  },
+  {
+   "id": "LC09_L2SP_231062_20250813_02_T1",
+   "data": "2025-08-13",
+   "cobertura": 0.816,
+   "mediana_c": 38.38
+  },
+  {
+   "id": "LC09_L2SP_231062_20251016_02_T1",
+   "data": "2025-10-16",
+   "cobertura": 0.807,
+   "mediana_c": 38.77
+  },
+  {
+   "id": "LC09_L2SP_231062_20260731_02_T1",
+   "data": "2026-07-31",
+   "cobertura": 0.952,
+   "mediana_c": 39.79
+  },
+  {
+   "id": "LC09_L2SP_231062_20260816_02_T1",
+   "data": "2026-08-16",
+   "cobertura": 0.834,
+   "mediana_c": 39.87
+  },
+  {
+   "id": "LC08_L2SP_231062_20260824_02_T1",
+   "data": "2026-08-24",
+   "cobertura": 0.898,
+   "mediana_c": 34.21
+  },
+  {
+   "id": "LC09_L2SP_231062_20260901_02_T1",
+   "data": "2026-09-01",
+   "cobertura": 0.965,
+   "mediana_c": 43.1
+  }
+ ],
+ "cenas_sentinel2": [
+  {
+   "id": "S2A_MSIL2A_20240807T142711_R053_T20MRB_20240807T220656",
+   "data": "2024-08-07",
+   "nuvem": 0.010449,
+   "hexagonos": 18973
+  },
+  {
+   "id": "S2B_MSIL2A_20240720T141719_R010_T20MRB_20240720T183608",
+   "data": "2024-07-20",
+   "nuvem": 0.038535,
+   "hexagonos": 32214
+  },
+  {
+   "id": "S2A_MSIL2A_20260826T142051_R010_T20MRB_20260827T000212",
+   "data": "2026-08-26",
+   "nuvem": 0.053788,
+   "hexagonos": 32215
+  },
+  {
+   "id": "S2B_MSIL2A_20260812T142709_R053_T20MRB_20260812T180646",
+   "data": "2026-08-12",
+   "nuvem": 0.13192,
+   "hexagonos": 18584
+  },
+  {
+   "id": "S2B_MSIL2A_20240809T141719_R010_T20MRB_20240809T165027",
+   "data": "2024-08-09",
+   "nuvem": 0.170891,
+   "hexagonos": 32024
+  },
+  {
+   "id": "S2A_MSIL2A_20250824T142811_R053_T20MRB_20250824T192213",
+   "data": "2025-08-24",
+   "nuvem": 0.181686,
+   "hexagonos": 18481
+  },
+  {
+   "id": "S2A_MSIL2A_20240708T142721_R053_T20MRB_20240708T211806",
+   "data": "2024-07-08",
+   "nuvem": 0.221282,
+   "hexagonos": 17960
+  },
+  {
+   "id": "S2A_MSIL2A_20250804T142811_R053_T20MRB_20250804T211614",
+   "data": "2025-08-04",
+   "nuvem": 0.309326,
+   "hexagonos": 17968
+  },
+  {
+   "id": "S2B_MSIL2A_20250804T141709_R010_T20MRB_20250804T162533",
+   "data": "2025-08-04",
+   "nuvem": 0.404273,
+   "hexagonos": 32154
+  },
+  {
+   "id": "S2C_MSIL2A_20260804T141711_R010_T20MRB_20260804T173102",
+   "data": "2026-08-04",
+   "nuvem": 0.480313,
+   "hexagonos": 26231
+  },
+  {
+   "id": "S2C_MSIL2A_20250730T141731_R010_T20MRB_20250730T193013",
+   "data": "2025-07-30",
+   "nuvem": 0.714817,
+   "hexagonos": 31659
+  },
+  {
+   "id": "S2B_MSIL2A_20250708T142719_R053_T20MRB_20250708T181310",
+   "data": "2025-07-08",
+   "nuvem": 0.774773,
+   "hexagonos": 16905
+  },
+  {
+   "id": "S2A_MSIL2A_20240827T142711_R053_T20MRB_20240827T203251",
+   "data": "2024-08-27",
+   "nuvem": 0.792415,
+   "hexagonos": 19542
+  },
+  {
+   "id": "S2B_MSIL2A_20250728T142719_R053_T20MRB_20250728T163653",
+   "data": "2025-07-28",
+   "nuvem": 0.813317,
+   "hexagonos": 18675
+  },
+  {
+   "id": "S2B_MSIL2A_20250824T141709_R010_T20MRB_20250824T175512",
+   "data": "2025-08-24",
+   "nuvem": 0.911993,
+   "hexagonos": 32214
+  },
+  {
+   "id": "S2B_MSIL2A_20240819T141709_R010_T20MRB_20240819T182149",
+   "data": "2024-08-19",
+   "nuvem": 1.01607,
+   "hexagonos": 32215
+  }
+ ]
+}

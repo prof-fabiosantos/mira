@@ -1,0 +1,12 @@
+h3>=4
+numpy
+pandas
+pyarrow
+geopandas
+shapely
+pyproj
+rasterio
+requests
+pystac-client
+planetary-computer
+osmnx

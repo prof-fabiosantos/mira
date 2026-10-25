@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+cache/
+dados/entrada/ibge/
+dados/intermediario/
+testes/tmp/
