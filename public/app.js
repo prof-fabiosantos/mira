@@ -189,7 +189,7 @@
       const t = {
         "água": "Este hexágono é principalmente água.",
         "área aeroportuária": "Fica em área aeroportuária, onde árvores não são indicadas.",
-        "vegetação densa (proteger)": `Já tem vegetação densa${cob != null ? ` (${cob}% de cobertura vegetal${temCopa(i) ? ` e ${D.copa[i]}% de copa de árvores` : ""})` : ""}. Aqui a prioridade é proteger a vegetação que existe, não plantar.`,
+        "vegetação densa (proteger)": `Já tem vegetação densa${cob != null ? ` (${cob}% de cobertura vegetal${temCopa(i) ? ` e ${D.copa[i]}% de copa de árvores nas imagens antigas` : ""})` : ""}. ${D.perda && D.perda[i] ? "Mas parte dela parece ter sido derrubada depois dessas imagens (veja o aviso abaixo). Aqui a prioridade é proteger a mata que resta e, se possível, recompor o que foi aberto." : "Aqui a prioridade é proteger a vegetação que existe, não plantar."}`,
         "sem dado de satélite": "Não há cenas de satélite sem nuvem suficientes para este hexágono.",
       }[motivo] || motivo;
       topo = `<span class="pill" style="color:var(--muted)">Fora do índice: ${motivo}</span>`;
