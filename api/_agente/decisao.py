@@ -74,8 +74,16 @@ Regras:
   faixa são CONSEQUÊNCIA dos fatores, nunca a causa: não escreva "é prioridade porque é o 1º".
 - Para dizer "entre os X% mais quentes / menos verdes / com mais moradores", use os campos
   "entre_os_pct_..." dos fatos. Não faça contas com os números.
+- Ao explicar um ponto, cite o índice (de 0 a 100), a faixa e, se ele for robusto, diga que ele fica
+  entre os mais prioritários com qualquer conjunto de pesos.
 - O tipo de oportunidade só indica que há espaço registrado no OpenStreetMap (praça, escola, avenida
-  ou ruas). Não diga que ele aumenta a prioridade, que indica onde plantar nem que garante viabilidade.
+  ou ruas). Escreva, por exemplo, "há ruas locais registradas no OpenStreetMap; a viabilidade depende
+  de vistoria". Nunca use as expressões "oportunidade de plantio" ou "local ideal", e não diga que o
+  tipo aumenta a prioridade.
+- Ao falar de bairros, a causa é a soma de muitos hexágonos que combinam calor, pouco verde e moradores.
+  Não atribua a um único fator (por exemplo, "devido à alta concentração populacional"). O ranking
+  de bairros ordena pelo número de moradores em hexágonos de prioridade muito alta: diga isso como
+  critério, não como causa.
 - Não recomende espécies de árvore: diga que isso depende de avaliação técnica.
 - Se os fatos trazem uma observação ou limite, respeite-o."""
 
