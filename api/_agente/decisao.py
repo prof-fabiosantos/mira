@@ -70,7 +70,12 @@ Regras:
 - Responda em português do Brasil, em no máximo 6 frases, tom claro e direto, sem saudação.
 - Use SOMENTE os FATOS fornecidos. Não invente números, lugares, leis, programas nem nomes de pessoas.
 - Escreva números como nos fatos (vírgula decimal; milhar com ponto). Pode arredondar para inteiro.
-- Explique o "porquê" com os fatores (calor, falta de verde, moradores) quando fizer sentido.
+- Explique o "porquê" com os três fatores (calor, falta de verde, moradores). A posição no ranking e a
+  faixa são CONSEQUÊNCIA dos fatores, nunca a causa: não escreva "é prioridade porque é o 1º".
+- Para dizer "entre os X% mais quentes / menos verdes / com mais moradores", use os campos
+  "entre_os_pct_..." dos fatos. Não faça contas com os números.
+- O tipo de oportunidade só indica que há espaço registrado no OpenStreetMap (praça, escola, avenida
+  ou ruas). Não diga que ele aumenta a prioridade, que indica onde plantar nem que garante viabilidade.
 - Não recomende espécies de árvore: diga que isso depende de avaliação técnica.
 - Se os fatos trazem uma observação ou limite, respeite-o."""
 
@@ -145,7 +150,12 @@ def responder(pergunta: str, contexto: dict | None = None) -> dict:
                    "bairro_do_mapa": d["bairros"][k_ctx] if k_ctx is not None else None,
                    "ponto_selecionado": d["h3"][hexi] if hexi is not None else None,
                    "pesos": _pesos_txt(pesos)})
-    fatos = {"pesos_em_uso": _pesos_txt(pesos)}
+    fatos = {"pesos_em_uso": _pesos_txt(pesos),
+             "escala_do_indice": "0 a 100",
+             "tamanho_do_hexagono": "cerca de 120 m",
+             "faixas": METODO["faixas"],
+             "oportunidade_significa": "espaço registrado no OpenStreetMap (praça, escola, avenida ou ruas); "
+                                       "não entra no índice e não garante viabilidade"}
     locais = []
     tipo = "texto"
 
@@ -174,7 +184,6 @@ def responder(pergunta: str, contexto: dict | None = None) -> dict:
         fatos["bairro"] = dados.resumo_bairro(alvo, calc, n_top=5 if intencao != "redigir_documento" else 3)
         fatos["cobertura_vegetal_media_da_cidade_pct"] = dados.media_cidade()
         fatos["definicao_muito_alta"] = "entre os 10% mais prioritários de Manaus"
-        fatos["tamanho_do_hexagono"] = "cerca de 120 m"
         fatos["observacao"] = METODO["limites"]
         for p in fatos["bairro"]["pontos_mais_prioritarios"][:5]:
             locais.append({"hexagono": p["hexagono"], "rotulo": f"{p['posicao_no_bairro']}º ponto"})
@@ -245,6 +254,8 @@ def _canon(n):
 
 
 def numeros_nao_verificados(texto: str, fatos: dict):
+    """Cada número do texto tem de estar nos fatos (exato ou arredondado). Nenhum número é liberado
+    por padrão: complementos, escalas e definições vão nos fatos, calculados pelo servidor."""
     permitidos = set()
     for _, leituras in _numeros(str(fatos)):
         for n in leituras:
@@ -255,7 +266,6 @@ def numeros_nao_verificados(texto: str, fatos: dict):
                 permitidos.add(_canon(round(f, 1)))
             except ValueError:
                 pass
-    permitidos |= {"1", "2", "3", "4", "5", "10", "60", "100", "120", "2010", "2019", "2022"}
     ruins = []
     for bruto, leituras in _numeros(texto):
         if not any(_canon(n) in permitidos for n in leituras):
@@ -283,7 +293,7 @@ def t_local(f):
                f"É mais quente que {p['mais_quente_que_pct_dos_hexagonos']}% dos hexágonos (superfície {_graus(p['superficie_vs_mediana_c'])}), "
                f"tem {_pct(p['cobertura_vegetal_pct'])} de cobertura vegetal, menos verde que {p['menos_verde_que_pct_dos_hexagonos']}% deles, "
                f"e cerca de {_br(p['moradores'])} moradores, mais que em {p['mais_moradores_que_pct_dos_hexagonos']}% dos hexágonos. "
-               f"Oportunidade: {p['oportunidade']}.")
+               f"Espaço registrado no OpenStreetMap: {p['oportunidade']} (não entra no índice).")
         if p.get("robusto_a_qualquer_peso"):
             txt += " É robusto: fica no topo com qualquer conjunto de pesos."
     if p.get("provavel_perda_de_copa"):

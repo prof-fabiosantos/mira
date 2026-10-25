@@ -139,6 +139,10 @@ def ficha(i, calc):
             "mais_quente_que_pct_dos_hexagonos": round(d["pc"][i] / 10),
             "menos_verde_que_pct_dos_hexagonos": round(d["pv"][i] / 10),
             "mais_moradores_que_pct_dos_hexagonos": round(d["pp"][i] / 10),
+            # complementos já calculados, para o texto não precisar fazer contas
+            "entre_os_pct_mais_quentes": 100 - round(d["pc"][i] / 10),
+            "entre_os_pct_menos_verdes": 100 - round(d["pv"][i] / 10),
+            "entre_os_pct_com_mais_moradores": 100 - round(d["pp"][i] / 10),
         })
     return f
 

@@ -63,5 +63,19 @@ with mock.patch.object(gemini, "ativo", lambda: True), mock.patch.object(gemini,
     r = decisao.responder("Onde plantar no Japiim?", {})
 checar(r["fonte_texto"] == "gemini", "texto com números certos é aprovado")
 
+# complementos: o certo passa, o errado é barrado (nenhum número pequeno é liberado por padrão)
+f = dados.ficha(d["_idx"][topo], dados.calcular(dados.PESOS_PADRAO))
+certo = f"Fica entre os {f['entre_os_pct_mais_quentes']}% mais quentes da cidade."
+# o valor errado não pode coincidir com outro número dos fatos (a conferência é por presença, não por sentido)
+fatos_ponto = {"ponto": f, "pesos_em_uso": "", "escala_do_indice": "0 a 100", "tamanho_do_hexagono": "cerca de 120 m",
+               "faixas": decisao.METODO["faixas"], "oportunidade_significa": ""}
+x = next(v for v in range(f["entre_os_pct_mais_quentes"] + 1, 100)
+         if decisao.numeros_nao_verificados(f"{v}%", fatos_ponto))
+errado = f"Fica entre os {x}% mais quentes da cidade."
+for txt, esperado, nome in [(certo, "gemini", "complemento certo é aprovado"), (errado, "template", "complemento errado é barrado")]:
+    with mock.patch.object(gemini, "ativo", lambda: True), mock.patch.object(gemini, "redigir", lambda i, m, max_tokens=500, t=txt: t):
+        r = decisao.responder("Por que este ponto é prioridade?", {"hexagono": topo})
+    checar(r["fonte_texto"] == esperado, nome)
+
 print("\nTodos os testes do assistente passaram." if not falhas else f"\n{falhas} falha(s).")
 sys.exit(1 if falhas else 0)
