@@ -4,7 +4,7 @@
 
 O Mirá mostra **onde uma árvore nova faz mais diferença** em Manaus. A cidade é dividida em 32 mil hexágonos de cerca de 120 m, mais ou menos uma quadra. Cada um recebe uma nota de 0 a 100 que combina três coisas: quanto a superfície esquenta, quanta vegetação falta e quantas pessoas moram ali. O site também mostra onde Manaus perdeu árvores e tem um assistente que explica os dados e redige ofícios para pedir o plantio.
 
-- **Site:** https://mira-sandy-kappa.vercel.app
+- **Site:** https://mira.eco.br
 - **Projeto irmão:** [Akub](https://akub-alpha.vercel.app/), o calor urbano em Manaus hora a hora
 - **Autor:** Prof. Dr. Fabio Santos (EST/UEA e LSI) · fssilva@uea.edu.br · piloto em Manaus
 
@@ -379,7 +379,7 @@ Abra http://localhost:8000. Use esse servidor, e não o `python -m http.server`,
    git push
    ```
    Cada push na `main` gera um deploy.
-6. **Testar:** `https://mira-sandy-kappa.vercel.app/api/status` deve responder `{"jev":"TypeSafe","redacao":"Gemini"}`.
+6. **Testar:** `https://mira.eco.br/api/status` deve responder `{"jev":"TypeSafe","redacao":"Gemini"}`.
 
 **Armadilhas já vistas:**
 - **Redeploy no deploy errado:** se mudar uma variável, faça Redeploy **no deploy mais recente** (o do último commit). Redeploy de um deploy antigo põe a versão antiga no ar.

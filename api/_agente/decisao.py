@@ -198,7 +198,7 @@ def responder(pergunta: str, contexto: dict | None = None) -> dict:
         if intencao == "redigir_documento":
             tipo = "documento"
             fatos["destinatario"] = DESTINATARIOS.get(destinatario, DESTINATARIOS["prefeitura"])
-            fatos["fonte"] = "Mirá (mira-sandy-kappa.vercel.app): Landsat, Sentinel-2, Censo 2022 do IBGE, OpenStreetMap e CHMv2"
+            fatos["fonte"] = "Mirá (mira.eco.br): Landsat, Sentinel-2, Censo 2022 do IBGE, OpenStreetMap e CHMv2"
     trilha.append({"etapa": "Código monta os fatos", "tipo": tipo, "n_fatos": _contar(fatos)})
 
     # 3. e 4. Gemini redige; servidor confere os números
