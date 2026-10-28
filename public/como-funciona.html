@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Como funciona o Mirá</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%231f5f37'/%3E%3Cpath d='M20 6c-6 0-10 5-10 10 0 5 4 9 10 9s10-4 10-9c0-5-4-10-10-10z' fill='%2389c48b'/%3E%3Crect x='18.6' y='22' width='2.8' height='12' rx='1.2' fill='%23f2e6c4'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -523,37 +524,9 @@ footer .wrap{padding-block:24px;font-size:13.5px;color:var(--muted);display:grid
   </div>
 </div></section>
 
-<section class="cap" id="onde"><div class="wrap">
-  <div class="cap-cab">
-    <span class="rotulo">8 · Onde fica cada coisa</span>
-    <h2>Arquivos, comandos e publicação</h2>
-  </div>
-  <div class="dois">
-    <div class="figura fatos" style="white-space:pre;font-size:12.5px;color:var(--ink)">plantio-manaus/
-├── pipeline/        01_grade … 08_web, rodar_tudo.py
-├── api/
-│   ├── index.py     FastAPI: /api/agente, /api/status
-│   └── _agente/     dados · decisao · jev · gemini
-├── public/          index.html · app.js · agente.js
-│   └── data/        web.json + CSV abertos
-├── explorar/        copas_chmv2.py (análise)
-├── testes/          pipeline sintético + assistente
-├── requirements.txt           servidor (Vercel)
-├── requirements-pipeline.txt  pipeline
-└── vercel.json · .vercelignore · .env.example</div>
-    <div class="texto">
-      <p><b>Gerar os dados</b>: <code>pip install -r requirements-pipeline.txt</code> e <code>python pipeline/rodar_tudo.py</code>.</p>
-      <p><b>Site com assistente, local</b>: <code>pip install -r requirements.txt</code>, copiar <code>.env.example</code> para <code>.env</code> com as chaves e rodar <code>uvicorn api.index:app --reload --port 8000</code>.</p>
-      <p><b>Publicar</b>: <code>git add -A</code>, <code>git commit</code>, <code>git push</code>. O Vercel serve <code>public/</code> e transforma <code>api/index.py</code> em função Python. As chaves ficam em Settings → Environment Variables, nunca no Git.</p>
-      <p><b>Conferir</b>: <code>/api/status</code> deve responder <code>{"jev":"TypeSafe","redacao":"Gemini"}</code>.</p>
-      <p class="nota">Ao mudar uma variável no Vercel, faça Redeploy do deploy <b>mais recente</b>. Redeploy de um deploy antigo põe a versão antiga no ar.</p>
-    </div>
-  </div>
-</div></section>
-
 <section class="cap" id="proximos"><div class="wrap">
   <div class="cap-cab">
-    <span class="rotulo">9 · Próximos passos</span>
+    <span class="rotulo">8 · Próximos passos</span>
     <h2>O que ainda dá para fazer com LLMs e VLMs</h2>
     <p class="sub">Em ordem aproximada de esforço dentro de cada grupo. As marcas indicam valor para quem usa, esforço e potencial de publicação.</p>
   </div>
@@ -568,7 +541,7 @@ footer .wrap{padding-block:24px;font-size:13.5px;color:var(--muted);display:grid
 </div></section>
 
 <section class="cap" id="glossario"><div class="wrap">
-  <div class="cap-cab"><span class="rotulo">10 · Glossário</span><h2>Termos usados neste guia</h2></div>
+  <div class="cap-cab"><span class="rotulo">9 · Glossário</span><h2>Termos usados neste guia</h2></div>
   <dl class="gloss">
     <div><dt>H3</dt><dd>Grade hexagonal global. Resolução 10 ≈ 15 mil m² por hexágono.</dd></div>
     <div><dt>LST</dt><dd>Temperatura da superfície medida por satélite. Não é a temperatura do ar.</dd></div>
